@@ -1,0 +1,119 @@
+#!/bin/bash
+# This Script will create a user and corresponding key.
+#echo -e " Please enter the name of the User"
+#read user
+#echo
+#echo -e "Please enter the name of the key"
+#read key_name
+#echo
+clear
+echo -e "\n\t\t SHELL PROGRAMMING TO CREATE USER KEYS"
+#echo -e "\t\t\tMAIN MENU"
+read -p "Enter the username: " user
+read -p "Enter the Name of the key: " key_name
+read -p "Enter the email address of the User: " email
+#read -s -p "Enter Password: " pass
+prompt="pass"
+while IFS= read -p "$prompt" -r -s -n 1 char
+do
+    if [[ $char == $'\0' ]]
+    then
+         break
+    fi
+    prompt='*'
+    pass+="$char"
+      
+done
+echo
+read -s -p "Re-Enter Password: " passagain
+while IFS= read -p "$passagain" -r -s -n 1 char
+do
+    if [[ $char == $'\0' ]]
+    then
+         break
+    fi
+    passagain='*'
+    passagain+="$char"
+done
+echo
+#echo -e "Please enter the passphrase for your key"
+#read -s pass
+#echo
+#echo -e "Please re-enter the passphrase for your key"
+#read -s passagain
+#pass="password:"
+#pass_fun()
+#{
+#while IFS= read -p "$password" -r -s -n 1 char
+#do
+#    if [[ $char == $'\0' ]]
+#    then
+#         break
+#    fi
+#    password='*'
+#    password+="$char"
+#	continue
+#done
+#}
+#
+#passagin="password-again:"
+#while IFS= read -p "$passagain" -r -s -n 1 char
+#do
+#    if [[ $char == $'\0' ]]
+#    then
+#         break
+#    fi
+#    passagain='*'
+#    password+="$char"
+#done
+
+if [ $pass == $passagain ]; then
+	continue
+	else
+	echo -e "Password does not match"
+	exit 1
+fi
+
+
+if [ -z $user ]; then
+		echo -e "Please enter valid user name"
+		exit 1
+	elif [ -d /home/$user ]; then
+		echo -e "$user already exist on the system, proceeding with the key generation"
+		continue
+	else
+		useradd $user
+		echo -e "$user has been successfully created"
+fi
+
+if [ -d /home/$user ]; then
+	cd /home/$user
+	sleep 2
+		if [ -d /home/$user/.ssh ]; then
+				mv .ssh .ssh_old
+				mkdir .ssh
+		else
+				mkdir .ssh
+		fi	
+	if [ -d /home/$user/.ssh ]; then
+			cd /home/$user/.ssh
+			#ssh-keygen -b 2048 -t rsa  < `cat /home/scripts/course/data`
+			ssh-keygen -b 2048 -t rsa  -f /home/$user/.ssh/$key_name -P "$pass" > /dev/null
+			echo "Keys has been successfuly generated for the user $user"
+			echo "Keys has been placed at /home/$user/.ssh"
+			chown -R $user:$user /home/$user/.ssh
+			chmod 700 /home/$user/.ssh/$key_name
+			cat /home/$user/.ssh/$key_name.pub >> /home/$user/.ssh/authorized_keys
+			chmod 700 /home/$user/.ssh
+			chown $user:$user /home/$user/.ssh/authorized_keys
+			chmod 600 /home/$user/.ssh/authorized_keys
+	#		echo -e "Your username: $user \n Your Key Passphrase: $pass" | mutt -a "/home/$user/.ssh/$key_name" -s "Access for the `hostname`" -- $email
+			
+	else 
+			echo ".ssh directiry does not exist at /home/$user/.ssh"
+		fi
+	else
+		echo "$user home directory does not exist"
+fi
+		
+			 
